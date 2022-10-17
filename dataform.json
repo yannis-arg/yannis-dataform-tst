@@ -1,5 +1,6 @@
 {
   "defaultSchema": "dataform",
+  "schemaSuffix": "_staging",
   "assertionSchema": "dataform_assertions",
   "warehouse": "bigquery",
   "defaultDatabase": "pj-yannis-dataform-tst",
