@@ -1,0 +1,33 @@
+pipelines:
+  - name: demo_views_tag # Based on the commited branch , create the workflow pipelines & the trigger (Ex : sbx_yanargy_demo_views_tag , dev_demo_views_tag)
+    tags :
+      - views
+      # - demo
+    schedule:
+      sbx: "@daily"
+      tst: "@weekly"
+      acc: "* 12 * * *"
+      prd: "@monthly"
+
+    timezone: "Europe/Brussels"
+
+
+  - name: demo_all_queries # Should create test_demo dataset (create_entity resource)
+    tags :
+      - all # Run all queries
+    schedule: "@daily"
+    timezone: "Europe/Brussels"
+
+
+# Goal of this file is to be put in a GCS bucket , then it triggers a Cloud function that creates :
+#
+# 1) The associate Dataform Workflow 
+#     - this Workflow triggers the queries with the defined tags ( E.g : run the 'views' tagged queries)
+# 2) The Cloud Schedule trigger (E.g -> sbx : "@daily" , the Workflow is triggered by cloud scheduler on a daily baisis)
+
+# NB : 
+#
+# Check the Dataform API to add more attributes in the yaml file
+#
+# Would be good to have like a pre-commit script or github action that checks that the yaml is valid 
+# (See this interesting link : https://blog.picnic.nl/how-to-use-yaml-schema-to-validate-your-yaml-files-c82c049c2097)

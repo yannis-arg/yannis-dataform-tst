@@ -1,0 +1,35 @@
+main:
+    params: [args] # Retrieve args passed as a JSON argument by the cloud-schedule job
+    steps:
+    - init:
+        assign:
+          - repository: projects/pj-yannis-dataform-tst/locations/europe-west4/repositories/repo-yannis-dataform
+    - createCompilationResult:
+        call: http.post
+        args:
+            url: ${"https://dataform.googleapis.com/v1beta1/" + repository + "/compilationResults"}
+            auth:
+                type: OAuth2
+            body:
+                gitCommitish: workspace-yannis-dataform # Get the branch name as well
+                codeCompilationConfig:
+                    defaultDatabase: pj-yannis-dataform-tst  # The google project ID that host the data -> this project changed based on the environment
+                    defaultSchema: dataform # The dataset in which the tables will be created
+                    schemaSuffix: ${args.environment} # add _[schemaSuffix] to the dataset defined in defaultDatabase {e.g : 'dev'}
+                    tablePrefix: ${args.environment} # add [tablePrefix]_ to the created tables {e.g : 'dev'}
+                
+        result: compilationResult
+    - createWorkflowInvocation:
+        call: http.post
+        args:
+            url: ${"https://dataform.googleapis.com/v1beta1/" + repository + "/workflowInvocations"}
+            auth:
+                type: OAuth2
+            body:
+                compilationResult: ${compilationResult.body.name}
+                invocationConfig:
+                    includedTags:
+                      - views # will execute the workflow only for tables with the tag 'views'
+        result: workflowInvocation
+    - complete:
+        return: ${workflowInvocation.body.name}
